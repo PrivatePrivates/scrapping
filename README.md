@@ -4,10 +4,10 @@ A simple CLI inherited from instaloader
 
 ## Setup
 
-{python3 -m vevn igscraper
-source igscraper/bin/activate
-pip install instagram-scraper} not needed now
-pip install instaloader
+{python3 -m vevn igscraper </br>
+source igscraper/bin/activate  </br>
+pip install instagram-scraper} not needed now (or check pls) </br>
+pip install instaloader </br>
 
 ## To Run
 export IG_USER= <your_username> </br>
