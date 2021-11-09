@@ -22,9 +22,21 @@ command = ""
 
 #instaloader and login
 L = instaloader.Instaloader()
-L.login(ig_username, ig_pass)    
+try:
+    L.load_session_from_file(ig_username)
+except:
+    if os.path.exists('~/.config/instaloader/session-test_private_privates'):
+        os.remove('~/.config/instaloader/session-test_private_privates')
+    pass
+finally:
+    command = 'instaloader -l {} -p {}'.format(ig_username, ig_pass)
+    os.system(command)
+    L.load_session_from_file(ig_username)
 
 def get_user_command(user, m):
+    # Create Dir if not exists
+    if not os.path.exists(user):
+        os.makedirs(user)
     #mdt is file to write filename-location info.
     mdt= open(user+"/metadata.txt",'w')
     print("started")
@@ -63,7 +75,13 @@ def get_user_command(user, m):
             f.write(followee.username + "\n")
             
 
-
+def get_multiple_users(user, users):
+    if len(users) <= 0:
+        print("No Followers found")
+        return
+    users = " ".join(i for i in users)
+    command="mkdir -p {}/followers && cd {}/followers && instagram-scraper {} --media-metadata --include-location -u {} -p {}".format(user, user, users, ig_username, ig_pass)   
+    os.system(command)
 
 #all parsing stuff 
 
@@ -85,17 +103,19 @@ print(args)
 
 if len(args.users) != 1 and args.all:
     parser.error("--all cannot be used with multiple users")
-
-##starts from here 
-if len(args.users) == 1 :
+elif args.all:
+    followers = []
+    with open(args.users[0] + '/followee.txt', 'r') as f:
+        followers = f.read()
+    followers = followers.split('\n')
+    followers.remove('')
+    get_multiple_users(args.users[0], followers)
+elif len(args.users) == 1 :
     get_user_command(args.users[0],args.m)
     print("Retrieved photos")
-
-if (len(args.users)>2):
+elif (len(args.users)>2):
     for x in args.users:
         get_user_command(x,0)
 
-else:
-    print("Usage : python3 scrape.py <username>")
 
 
