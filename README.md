@@ -29,3 +29,7 @@ python scrape.py username1 username2 username3
 ```
 python scrape.py username -a
 ```
+ 
+## output
+Directory with images, metedata file , followees list text file, nolocation.txt - names of files which don't have location </br>
+some json zip files of all other metadata data and logs  (Can be ignored)

@@ -3,6 +3,7 @@ import json
 import os
 import argparse
 import instaloader
+import csv
 from time import sleep
 try:
     import lzma
@@ -15,7 +16,7 @@ command = ""
 
 #usage : ./python
 # Input : Username
-# Output: All media of username (Optional) including meta data (locaation tags and all)
+# Output: All media of username (Optional) including meta data (location tags and all)
 #         All the people he is following
 # Under Work 
 
@@ -38,38 +39,47 @@ def get_user_command(user, m):
     if not os.path.exists(user):
         os.makedirs(user)
     #mdt is file to write filename-location info.
-    mdt= open(user+"/metadata.txt",'w')
+    mdt= open(user+"/metadata.csv",'w')
+    csvwriter=csv.writer(mdt)
+    nodata=open(user+"/nolocation.txt",'w')
     print("started")
     num=0
     filename=''
-    loc=''
+   
     profile = instaloader.Profile.from_username(L.context, user)
     #(fix1)
     # #This if isnt working downloads all files 
     if (m!=0):
         for post in profile.get_posts():
+            meta_data={}
             L.download_post(post, target=profile.username)   #download post
             filename =L.format_filename(post, target=profile.username) #getfilename
             print(filename)
-            mdt.write(filename+'.jpg\n')
             file=lzma.open('./'+profile.username+'/'+filename+'.json.xz').read()  #unzip metdata
             data=json.loads(file)
-            loc=data['node']['location']
-            mdt.write(str(loc)+"\n") 
+            meta_data=data['node']['location']
+            if meta_data is not None:
+                meta_data['imagename']=filename
+                for key, value in meta_data.items():
+                    csvwriter.writerow([key, value])
+            else:
+                nodata.write(filename+'.jpg\n')
             num+=1
             if(num==m):
                 break
     else:
         for post in profile.get_posts():
+            meta_data={}
             L.download_post(post, target=profile.username)   #download post
             filename =L.format_filename(post, target=profile.username) #getfilename
             print(filename)
-            mdt.write(filename+'.jpg\n')
             file=lzma.open('./'+profile.username+'/'+filename+'.json.xz').read()  #unzip metdata
             data=json.loads(file)
-            loc=data['node']['location']
-            mdt.write(str(loc)+"\n")                    #write into a file   
-    sleep(2)
+            meta_data['imagename']=filename
+            meta_data=data['node']['location']
+            for key, value in meta_data.items():
+                csvwriter.writerow([key, value])                #write into a file   
+    #sleep(1)
     with open(user + "/followee.txt", "w") as f:       #write followers into file
         for followee in profile.get_followees():
             f.write(followee.username + "\n")
