@@ -26,8 +26,8 @@ L = instaloader.Instaloader()
 try:
     L.load_session_from_file(ig_username)
 except:
-    if os.path.exists('~/.config/instaloader/session-test_private_privates'):
-        os.remove('~/.config/instaloader/session-test_private_privates')
+    if os.path.exists('~/.config/instaloader/session-'+ig_username):
+        os.remove('~/.config/instaloader/session-'+ig_username)
     pass
 finally:
     command = 'instaloader -l {} -p {}'.format(ig_username, ig_pass)
@@ -59,6 +59,7 @@ def get_user_command(user, m):
             data=json.loads(file)
             meta_data=data['node']['location']
             if meta_data is not None:
+                L.download_post(post, target=profile.username+'loc')
                 meta_data['imagename']=filename
                 for key, value in meta_data.items():
                     csvwriter.writerow([key, value])
@@ -86,6 +87,7 @@ def get_user_command(user, m):
             
 
 def get_multiple_users(user, users):
+    
     if len(users) <= 0:
         print("No Followers found")
         return
@@ -119,7 +121,11 @@ elif args.all:
         followers = f.read()
     followers = followers.split('\n')
     followers.remove('')
-    get_multiple_users(args.users[0], followers)
+    red_foll=[]
+    for i in range (0,10):
+        red_foll.append(followers[i])
+    print(red_foll)
+    get_multiple_users(args.users[0], red_foll)
 elif len(args.users) == 1 :
     get_user_command(args.users[0],args.m)
     print("Retrieved photos")
